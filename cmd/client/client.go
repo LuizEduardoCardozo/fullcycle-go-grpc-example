@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"io"
 	"log"
 
 	"github.com/LuizEduardoCardozo/fullcycle-go-grpc-example/pb"
@@ -23,6 +24,33 @@ func AddUser(client pb.UserServiceClient) {
 	}
 
 	fmt.Print(res)
+}
+
+func AddUserVerbose(client pb.UserServiceClient) {
+	req := &pb.User{
+		Id:    "3",
+		Name:  "Eduardo",
+		Email: "eduard.cardoz@gmail.com",
+	}
+
+	responseStream, err := client.AddUserVerbose(context.Background(), req)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	for {
+		stream, err := responseStream.Recv()
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		fmt.Println(stream)
+
+	}
+
 }
 
 func main() {
