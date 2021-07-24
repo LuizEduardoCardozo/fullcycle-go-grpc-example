@@ -27,6 +27,7 @@ func AddUser(client pb.UserServiceClient) {
 }
 
 func AddUserVerbose(client pb.UserServiceClient) {
+
 	req := &pb.User{
 		Id:    "3",
 		Name:  "Eduardo",
