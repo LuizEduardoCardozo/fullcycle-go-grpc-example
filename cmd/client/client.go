@@ -62,6 +62,6 @@ func main() {
 	defer connection.Close()
 
 	client := pb.NewUserServiceClient(connection)
-	AddUser(client)
+	AddUserVerbose(client)
 
 }
