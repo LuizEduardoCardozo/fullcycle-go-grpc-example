@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"time"
 
 	"github.com/LuizEduardoCardozo/fullcycle-go-grpc-example/pb"
 	"google.golang.org/grpc"
@@ -54,6 +55,44 @@ func AddUserVerbose(client pb.UserServiceClient) {
 
 }
 
+func AddUsers(client pb.UserServiceClient) {
+	reqs := []*pb.User{
+		&pb.User{
+			Id:    "1",
+			Name:  "Eduardo",
+			Email: "eduard.cardoz@gmail.com",
+		},
+		&pb.User{
+			Id:    "2",
+			Name:  "Wesley Willians",
+			Email: "wesley@fullcycle.com.br",
+		},
+		&pb.User{
+			Id:    "3",
+			Name:  "Rodrigo",
+			Email: "rod.abreu@gmail.com",
+		},
+	}
+
+	stream, err := client.AddUsers(context.Background())
+	if err != nil {
+		log.Fatalf("Error while creating request: %s\n", err)
+	}
+
+	for counter, req := range reqs {
+		stream.Send(req)
+		time.Sleep(time.Second * 3)
+		fmt.Printf("Request number %d sended\n", counter+1)
+	}
+
+	res, err := stream.CloseAndRecv()
+	if err != nil {
+		log.Fatalf("Error while receiving the response: %s\n", err)
+	}
+
+	fmt.Println(res)
+}
+
 func main() {
 
 	connection, err := grpc.Dial("localhost:5051", grpc.WithInsecure())
@@ -63,6 +102,7 @@ func main() {
 	defer connection.Close()
 
 	client := pb.NewUserServiceClient(connection)
-	AddUserVerbose(client)
-
+	fmt.Println("Adding users")
+	AddUsers(client)
+	fmt.Println("Users added!")
 }

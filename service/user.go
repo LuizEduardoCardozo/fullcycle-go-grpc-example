@@ -63,7 +63,6 @@ func (*UserService) AddUserVerbose(req *pb.User, stream pb.UserService_AddUserVe
 func (*UserService) AddUsers(stream pb.UserService_AddUsersServer) error {
 
 	users := []*pb.User{}
-
 	for {
 		req, err := stream.Recv()
 		if err != io.EOF {
@@ -74,8 +73,6 @@ func (*UserService) AddUsers(stream pb.UserService_AddUsersServer) error {
 		if err != nil {
 			log.Fatalf("Error while receiving the stream: %s\n", err)
 		}
-
-		fmt.Printf("Adding user %s\n", req.GetEmail())
 
 		users = append(users, &pb.User{
 			Id:    req.GetId(),
