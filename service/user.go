@@ -3,6 +3,8 @@ package service
 import (
 	"context"
 	"fmt"
+	"io"
+	"log"
 	"time"
 
 	"github.com/LuizEduardoCardozo/fullcycle-go-grpc-example/pb"
@@ -55,5 +57,32 @@ func (*UserService) AddUserVerbose(req *pb.User, stream pb.UserService_AddUserVe
 	})
 
 	return nil
+
+}
+
+func (*UserService) AddUsers(stream pb.UserService_AddUsersServer) error {
+
+	users := []*pb.User{}
+
+	for {
+		req, err := stream.Recv()
+		if err != io.EOF {
+			return stream.SendAndClose(&pb.Users{
+				User: users,
+			})
+		}
+		if err != nil {
+			log.Fatalf("Error while receiving the stream: %s\n", err)
+		}
+
+		fmt.Printf("Adding user %s\n", req.GetEmail())
+
+		users = append(users, &pb.User{
+			Id:    req.GetId(),
+			Name:  req.GetName(),
+			Email: req.GetEmail(),
+		})
+
+	}
 
 }
