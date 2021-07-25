@@ -93,6 +93,69 @@ func AddUsers(client pb.UserServiceClient) {
 	fmt.Println(res)
 }
 
+func AddUsersStreamBoth(client pb.UserServiceClient) {
+	stream, err := client.AddUsersStreamBoth(context.Background())
+	if err != nil {
+		log.Fatalf("Error while receiving the stream: %s\n", err)
+	}
+
+	reqs := []*pb.User{
+		{
+			Id:    "1",
+			Name:  "Eduardo",
+			Email: "eduard.cardoz@gmail.com",
+		},
+		{
+			Id:    "2",
+			Name:  "Wesley Willians",
+			Email: "wesley@fullcycle.com.br",
+		},
+		{
+			Id:    "3",
+			Name:  "Rodrigo",
+			Email: "rod.abreu@gmail.com",
+		},
+	}
+
+	wait := make(chan int)
+
+	go func() {
+
+		for _, req := range reqs {
+			fmt.Printf("sending user: %s", req.GetEmail())
+
+			stream.Send(req)
+			time.Sleep(time.Second * 2)
+
+		}
+		stream.CloseSend()
+
+	}()
+
+	go func() {
+
+		for {
+			res, err := stream.Recv()
+			if err == io.EOF {
+				break
+			}
+			if err != nil {
+				log.Fatalf("error while receiving the data: %s\n", err)
+				break
+			}
+
+			fmt.Printf("received user %s with the status %s",
+				res.GetUser().GetEmail(),
+				res.GetResult(),
+			)
+		}
+		close(wait)
+	}()
+
+	<-wait
+
+}
+
 func main() {
 
 	connection, err := grpc.Dial("localhost:5051", grpc.WithInsecure())
@@ -103,6 +166,6 @@ func main() {
 
 	client := pb.NewUserServiceClient(connection)
 	fmt.Println("Adding users")
-	AddUsers(client)
+	AddUsersStreamBoth(client)
 	fmt.Println("Users added!")
 }

@@ -84,7 +84,7 @@ func (*UserService) AddUsers(stream pb.UserService_AddUsersServer) error {
 
 }
 
-func AddUserStreamBoth(stream pb.UserService_AddUsersStreamBothServer) error {
+func AddUsersStreamBoth(stream pb.UserService_AddUsersStreamBothServer) error {
 
 	for {
 		req, err := stream.Recv()
